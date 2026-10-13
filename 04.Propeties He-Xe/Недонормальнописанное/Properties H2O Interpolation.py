@@ -3,7 +3,7 @@ from ctREFPROP.ctREFPROP import REFPROPFunctionLibrary
 from scipy.interpolate import RegularGridInterpolator
 
 if 'RP' not in locals():
-    RP = REFPROPFunctionLibrary('C:\Program Files (x86)\REFPROP')
+    RP = REFPROPFunctionLibrary(r'C:\Program Files (x86)\REFPROP')
 RP.FLAGSdll('PR', 1)
 
 T_min, T_max = 250, 450
