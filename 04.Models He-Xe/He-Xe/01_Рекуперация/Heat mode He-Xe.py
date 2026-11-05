@@ -1,127 +1,88 @@
-import numpy as np
-import pandas as pd
-from scipy.optimize import newton, least_squares
-import matplotlib.pyplot as plt
+"""He--Xe: отпуск теплоты. Свип T входа реактора и суммарных потерь газа."""
+from __future__ import annotations
+from pathlib import Path
 from multiprocessing import Pool
-from time import time
-import os
+import os, sys, types
+import numpy as np, pandas as pd, matplotlib.pyplot as plt
+from scipy.optimize import brentq
+try: from tqdm.auto import tqdm
+except ImportError: tqdm=None
 
-fluids = np.array(['He-Xe', 'Water'])
-x, P_in, T_max, T_pipe, dP_heat_source, eff_expander, N_pinch = 0.283, 4.8e6, 1060, 1030, dict(Heat = 0.0364e-2, Cool = 0.497e-2), dict(Turb = 92.67e-2, Pump = 87.06e-2), 20
-P_water, T_water_max, T_water_min, dP_water = 1.6e6, 70, 40, 5e-2, 
-Q, eff_exchanger, KPD_hexe, KPD_water = 2.75e6, 95e-2, 0.95 * 0.9, 0.95 * 0.8
-Q_water = Q * eff_exchanger
+ROOT=Path(__file__).resolve().parent; OUT=ROOT/'res_heat_mode_dp_tin'; N=('D','H','S','Cp','Vis','Tcx'); W=None
+Q0,ER,X,P0,T0,T1=2.75e6,.99,.283,4.8e6,1060+273.15,1030+273.15
+PW,DPW,TW0,TW1,EPW,EMW=1.6e6,.05,40+273.15,70+273.15,.80,.95
+EC,EMC,EMM=.8706,.95,.90; WT=(.2,.4,.4) # pipe, HX, reactor
 
-dP_line = np.arange(3, 7, 1) * 1e-2
-dT_line = np.arange(50, 350, 50)
-data_stack = [(dP, dT) for dP in dP_line for dT in dT_line]
-dP_fix = np.where(dP_line == 5e-2)[0][0]
-
-params = ['D', 'H', 'S', 'Cp', 'Vis', 'Tcx']
-nodes = pd.DataFrame(index = np.arange(6), columns = ['Fluid', 'T', 'P', 'x', 'G'] + params, dtype = np.float64)
-nodes['Fluid'] = pd.Series(nodes['Fluid'], dtype = np.str_)
-blocks = pd.DataFrame(index = ['Heat', 'Pump', 'Exch', 'Pipe', 'Pump_water'], columns = ['Q', 'N', 'Aux'], dtype = np.float64)
-
-props = {fluids[0]: dict(zip(params, np.load('props.npy', allow_pickle = True))), fluids[1]: dict(zip(params, np.load('props_water.npy', allow_pickle = True)))}
-#T_min_props, T_max_props = min(props[]['H'].grid[2]), max(props['H'].grid[2])
-
-def T_err(**kwargs):
-    params_in = list(kwargs.keys())
-    param = [param for param in params_in if param not in ['Fluid', 'x', 'P', 'T']][0]
-    
-    err = lambda T: kwargs[param] - props[kwargs['Fluid']][param]((kwargs['x'], kwargs['P'], T))
-    T = newton(err, kwargs['T'], tol = 1e-6)
-    return T
-
-def Node(node, **kwargs):
-    nodes.loc[node, kwargs.keys()] = list(kwargs.values())
-    nodes.loc[node, params] = [props[nodes.loc[node, 'Fluid']][param]((nodes.loc[node, 'x'], kwargs['P'], kwargs['T'])) for param in params]
-    pass
-
-def Expander(name, node1, node2, eff):
-    P2 = nodes.loc[node2, 'P']
-    S1 = nodes.loc[node1, 'S']
-    T2 = nodes.loc[node1, 'T'] * (P2 / nodes.loc[node1, 'P']) ** 0.4
-    H2t = props[nodes.loc[node2, 'Fluid']]['H']((nodes.loc[node2, 'x'], P2, T_err(S = S1, Fluid = fluids[0], x = nodes.loc[node2, 'x'], P = P2, T = T2)))
-    H2 = nodes.loc[node1, 'H'] * (1 - eff[name]) + H2t * eff[name] if name == 'Turb' else nodes.loc[node1, 'H'] * (1 - 1 / eff[name]) + H2t * 1 / eff[name]
-    
-    Node(node2, P = P2, T = T_err(H = H2, Fluid = fluids[0], x = nodes.loc[node2, 'x'], P = P2, T = T2), G = nodes.loc[node1, 'G'])
-    blocks.loc[name, 'N'] = nodes.loc[node2, 'G'] * (nodes.loc[node1, 'H'] - nodes.loc[node2, 'H'])
-    pass
-
-def Heat_source(name, node1, node2):
-    Node(node2, P = nodes.loc[node2, 'P'], T = nodes.loc[node2, 'T'], G = nodes.loc[node1, 'G'])
-    blocks.loc[name, 'Q'] = nodes.loc[node2, 'G'] * (nodes.loc[node2, 'H'] - nodes.loc[node1, 'H'])
-    pass
-
-def Loop(args, dT):
-    nodes.loc[2, 'T'] = args[0]
-    nodes.loc[[0, 1, 2, 3], 'G'] = args[1]
-    
-    Node(2, P = nodes.loc[2, 'P'], T = nodes.loc[2, 'T'])
-    Expander('Pump', 2, 3, eff_expander)
-    
-    H_rec, P_rec, T_rec = [np.vstack([np.linspace(nodes.loc[1, param], nodes.loc[2, param], N_pinch), np.linspace(nodes.loc[5, param], nodes.loc[4, param], N_pinch)]) for param in ['H', 'P', 'T']]
-    T_pinch = np.min(T_err(H = H_rec[0], Fluid = fluids[0], x = nodes.loc[1, 'x'], P = P_rec[0], T = T_rec[0]) - T_err(H = H_rec[1], Fluid = fluids[1], x = nodes.loc[4, 'x'], P = P_rec[1], T = T_rec[1]))
-    
-    blocks.loc['Exch', 'Q'] = nodes.loc[1, 'G'] * (nodes.loc[2, 'H'] - nodes.loc[1, 'H'])
-    
-    eq = []
-    eq.append(blocks.loc['Exch', 'Q'] + Q_water)
-    eq.append(T_pinch - dT)
-    return eq
-
-def Heating(dP, dT):
-    nodes.loc[:, 'Fluid'] = [fluids[0]] * 4 + [fluids[1]] * 2
-    nodes.loc[:, 'x'] = [x] * 4 + [1] * 2
-    nodes.loc[:, 'P'] = [P_in] * 2 + [P_in * (1 - dP)] + [P_in * (1 + dP_heat_source['Heat'])] + [P_water] + [P_water * (1 - dP_water)]
-    nodes.loc[[0, 1, 4, 5], 'T'] = np.array([T_max, T_pipe, T_water_min, T_water_max]) + 273.15
-    
-    for node in [0, 1, 4, 5]: Node(node, P = nodes.loc[node, 'P'], T = nodes.loc[node, 'T'])
-    nodes.loc[[4, 5], 'G'] = Q_water / (nodes.loc[5, 'H'] - nodes.loc[4, 'H'])
-    least_squares(Loop, [nodes.loc[4, 'T'] + dT, Q_water / (nodes.loc[1, 'H'] - nodes.loc[4, 'H'])], args = (dT,), bounds = ([nodes.loc[4, 'T'], 0], [nodes.loc[1, 'T'], np.inf]), xtol = 1e-6)
-    Heat_source('Heat', 3, 0)
-    Heat_source('Pipe', 0, 1)
-    
-    blocks.loc['Pump', 'Aux'] = np.abs(blocks.loc['Pump', 'N']) * KPD_hexe
-    blocks.loc['Pump_water', 'Aux'] = nodes.loc[4, 'G'] * (nodes.loc[4, 'P'] - nodes.loc[5, 'P']) / (props[fluids[1]]['D']((nodes.loc[4, 'x'], nodes.loc[4, 'P'], nodes.loc[4, 'T'])) * KPD_water)
-    
-    KPD = (Q_water - np.sum(blocks.loc[:, 'Aux'])) / Q
-    balance = np.sum(blocks.loc[:, 'Q']) - np.sum(blocks.loc[:, 'N'])
-    print(f'KPD: {KPD:.3}; Balance: {balance:.2}\n')
-    return KPD, blocks.loc['Pump', 'Aux'], blocks.loc['Pump_water', 'Aux'], blocks.loc['Pump', 'Aux'] + blocks.loc['Pump_water', 'Aux']
-
-if __name__ == '__main__':
-    start = time()
-    dir_out = os.path.join(os.getcwd(), 'res')
-    dir_out_img = os.path.join(dir_out, 'img')
-    os.makedirs(dir_out_img, exist_ok = True)
-    
-    with Pool(14) as p:
-        KPD, aux_hexe, aux_water, aux_sum = zip(*p.starmap(Heating, data_stack))
-    pd.DataFrame(np.column_stack([data_stack, KPD, aux_hexe, aux_water, aux_sum]), columns = ['dP', 'dT', 'KPD', 'aux_hexe', 'aux_water', 'aux_sum']).to_excel(os.path.join(dir_out, 'full_stack.xlsx'), index = False)
-    
-    plt.figure(figsize = (9, 6), dpi = 300)
-    plt.plot(dT_line, np.array(aux_hexe).reshape(len(dP_line), len(dT_line))[dP_fix], marker = 'o', markersize = 5, label = 'Насос He-Xe')
-    plt.plot(dT_line, np.array(aux_water).reshape(len(dP_line), len(dT_line))[dP_fix], marker = 'o', markersize = 5, label = 'Водяной насос')
-    plt.plot(dT_line, np.array(aux_sum).reshape(len(dP_line), len(dT_line))[dP_fix], marker = 'o', markersize = 5, label = 'Суммарная потребляемая мощность')
-    plt.xlabel('Минимальный температурный напор в теплообменнике, °C')
-    plt.ylabel('Мощность, кВт')
-    plt.legend(loc = 'best')
-    plt.grid()
-    plt.tight_layout()
-    plt.savefig(os.path.join(dir_out_img, 'Мощность.png'))
-    plt.show()
-    plt.clf()
-    
-    plt.figure(figsize = (9, 6), dpi = 300)
-    KPD_arr = np.array(KPD).reshape(len(dP_line), len(dT_line))
-    for i, dP in enumerate(dP_line): plt.plot(dT_line, KPD_arr[i] * 100, marker = 'o', markersize = 5, label = f'ΔP = {int(round(dP * 100))}%')
-    plt.xlabel('Минимальный температурный напор в теплообменнике, °C')
-    plt.ylabel('КПД нетто, %')
-    plt.legend(loc = 'best')
-    plt.grid()
-    plt.tight_layout()
-    plt.savefig(os.path.join(dir_out_img, 'КПД'))
-    plt.show()
-    plt.clf()
+def legacy():
+ n='scipy._external.array_api_compat.numpy._aliases'
+ if n not in sys.modules: m=types.ModuleType(n);m.asarray=np.asarray;sys.modules[n]=m
+class P:
+ def __init__(s,f,x):
+  legacy();s.f=dict(zip(N,np.load(ROOT/f,allow_pickle=True)));s.x=x
+  for z in s.f.values():
+   if not hasattr(z,'grid') and hasattr(z,'_grid'):z.grid=z._grid
+   if not hasattr(z,'values') and hasattr(z,'_values'):z.values=z._values
+ def v(s,n,p,t): return float(np.asarray(s.f[n]((s.x,p,t))).squeeze())
+ def inv(s,n,y,p):
+  g=np.asarray(s.f[n].grid[2],float);f=lambda t:s.v(n,p,t)-y
+  if f(g[0])*f(g[-1])<=0:return brentq(f,g[0],g[-1])
+  a=np.array([f(t) for t in g]);i=np.flatnonzero(a[:-1]*a[1:]<=0)
+  if not len(i):raise ValueError('свойство вне таблицы')
+  return brentq(f,g[i[0]],g[i[0]+1])
+def hc(p,h,s,p3):
+ tis=p.inv('S',s,p3);his=p.v('H',p3,tis);return h+(his-h)/EC
+def calc(task):
+ tin,dp=task; he,wa=W
+ # произведение трёх падений точно равно 1-dp
+ fp,fh,fr=[(1-dp)**w for w in WT]; p1=P0*fp;p2=p1*fh;p3=P0/fr
+ h0,h1=he.v('H',P0,T0),he.v('H',p1,T1); pw5=PW*(1-DPW);h4,h5=wa.v('H',PW,TW0),wa.v('H',pw5,TW1);qr=Q0*ER
+ h3=he.v('H',p3,tin+273.15)
+ # T2 определяется из условия: компрессор должен дать заданную Tвх реактора
+ grid=np.linspace(TW0+5,T1-5,60); fun=lambda t:hc(he,he.v('H',p2,t),he.v('S',p2,t),p3)-h3
+ a=np.array([fun(t) for t in grid]);ii=np.flatnonzero(a[:-1]*a[1:]<=0)
+ if not len(ii):raise ValueError('не найдено состояние перед компрессором')
+ t2=brentq(fun,grid[ii[0]],grid[ii[0]+1]);h2=he.v('H',p2,t2);g=qr/(h0-h3);qh=g*(h1-h2)
+ if min(g,qh)<=0:raise ValueError('нефизический расход/тепловой поток')
+ gw=qh/(h5-h4);qpipe=g*(h0-h1);nc=g*(h3-h2);nce=nc/(EMC*EMM);rho=wa.v('D',(PW+pw5)/2,(TW0+TW1)/2);nw=gw/rho*(PW-pw5)/(EPW*EMW)
+ cph=he.v('Cp',(p1+p2)/2,(T1+t2)/2);cpw=wa.v('Cp',(PW+pw5)/2,(TW0+TW1)/2);eta=qh/(min(g*cph,gw*cpw)*(T1-TW0));pin=min(T1-TW1,t2-TW0);bal=qr-qpipe-qh+nc
+ return dict(valid=abs(bal)<1 and pin>=5 and 0<eta<=1,T_in_C=tin,dP_gas_percent=dp*100,T2_C=t2-273.15,G_HeXe=g,G_water=gw,Q_water_MW=qh/1e6,Q_pipe_loss_kW=qpipe/1e3,Q_reactor_loss_kW=(Q0-qr)/1e3,N_comp_fluid_kW=nc/1e3,N_comp_el_kW=nce/1e3,N_pump_kW=nw/1e3,N_aux_kW=(nce+nw)/1e3,eta_hx=eta,eta_net_percent=100*(qh-nce-nw)/Q0,pinch_K=pin,balance_W=bal,P2_MPa=p2/1e6,P3_MPa=p3/1e6)
+def init():
+ global W;W=(P('props.npy',X),P('props_water.npy',1.))
+def work(x):
+ try:return calc(x)
+ except Exception as e:return dict(valid=False,T_in_C=x[0],dP_gas_percent=100*x[1],reason=str(e))
+def line(ax,x,y,d,label,style):ax.plot(d[x],d[y],style,lw=2,ms=6,label=label)
+def savefig(fig,name):
+ fig.savefig(OUT/(name+'.png'),dpi=300,bbox_inches='tight')
+ fig.savefig(OUT/(name+'.svg'),bbox_inches='tight')
+ plt.close(fig)
+def figs(df):
+ plt.rcParams.update({'font.family':'Times New Roman','font.size':16,'mathtext.fontset':'stix','axes.linewidth':1.2})
+ best=df.loc[df.eta_net_percent.idxmax()];
+ for y,yl,f in [('eta_net_percent','КПД нетто АСММ, %','eta_vs_tin.png'),('N_comp_el_kW','Мощность компрессора, кВт','comp_vs_tin.png'),('Q_water_MW','Отпускаемая теплота, МВт','heat_vs_tin.png')]:
+  fig,ax=plt.subplots(figsize=(9,6),dpi=220)
+  for dp in [1,5,10,15]:
+   d=df[np.isclose(df.dP_gas_percent,dp)].sort_values('T_in_C');line(ax,'T_in_C',y,d,f'ΔP = {dp} %','o-')
+  ax.axvline(best.T_in_C,color='#a33',ls='--',lw=1.5);ax.set(xlabel='Температура входа в реактор, °C',ylabel=yl,title='Влияние температуры и потерь давления');ax.grid(alpha=.22);ax.minorticks_on();ax.legend(fontsize=14);fig.tight_layout();savefig(fig,Path(f).stem)
+ piv=df.pivot(index='T_in_C',columns='dP_gas_percent',values='eta_net_percent');Xg,Yg=np.meshgrid(piv.columns,piv.index);fig,ax=plt.subplots(figsize=(9,6),dpi=220);cf=ax.contourf(Xg,Yg,piv.values,25);cs=ax.contour(Xg,Yg,piv.values,10,colors='k');ax.clabel(cs,fontsize=10);ax.plot(best.dP_gas_percent,best.T_in_C,'r*',ms=15);ax.set(xlabel='Суммарные потери давления газа, %',ylabel='Температура входа в реактор, °C',title='Карта КПД нетто');fig.colorbar(cf,label='КПД нетто, %');fig.tight_layout();savefig(fig,'eta_map')
+ # Сводные однопараметрические графики: каждая линия — фиксированное ΔP.
+ for x,y,xl,yl,name in [('T2_C','eta_net_percent','Температура выхода ТО, °C','КПД нетто, %','eta_vs_T_out'),('eta_hx','eta_net_percent','Фактическая эффективность ТО','КПД нетто, %','eta_vs_hx'),('pinch_K','eta_net_percent','Минимальный температурный напор ТО, K','КПД нетто, %','eta_vs_pinch'),('dP_gas_percent','N_aux_kW','Суммарные потери давления газа, %','Суммарные СН, кВт','aux_vs_dp')]:
+  fig,ax=plt.subplots(figsize=(9,6),dpi=220)
+  group='dP_gas_percent' if x!='dP_gas_percent' else 'T_in_C'
+  for value,d in df.groupby(group):
+   d=d.sort_values(x);ax.plot(d[x],d[y],'o-',lw=1.8,ms=4,label=(f'ΔP = {value:g} %' if group=='dP_gas_percent' else f'Tвх = {value:g} °C'))
+  ax.set(xlabel=xl,ylabel=yl,title='Сравнение расчётных режимов');ax.grid(alpha=.22);ax.minorticks_on();ax.legend(fontsize=13,ncol=2);fig.tight_layout();savefig(fig,name)
+ # Тепловой баланс использования мощности реактора для оптимального режима.
+ labels=['Потери\nреактора','Потери\nтрубопровода','Работа\nкомпрессора','Отпуск\nтеплоты','СН\nэлектрические']
+ vals=[best.Q_reactor_loss_kW/1000,best.Q_pipe_loss_kW/1000,best.N_comp_fluid_kW/1000,best.Q_water_MW,best.N_aux_kW/1000]
+ fig,ax=plt.subplots(figsize=(10,6),dpi=220);bars=ax.bar(labels,vals,color=['#5b9ec9','#7fb3d5','#4d8cbd','#c00000','#8cc0df'],edgecolor='0.25')
+ for b,v in zip(bars,vals):ax.text(b.get_x()+b.get_width()/2,v/2 if v>.25 else v+.03,f'{v:.3f}',ha='center',va='center' if v>.25 else 'bottom',fontsize=15,fontweight='bold',color='white' if v>.25 else 'black')
+ ax.set(ylabel='Мощность, МВт',title='Распределение начальной тепловой мощности');ax.grid(axis='y',alpha=.25);ax.minorticks_on();ax.text(.02,.96,f'КПД нетто = {best.eta_net_percent:.3f}%\nTвх = {best.T_in_C:.0f} °C; ΔP = {best.dP_gas_percent:.0f}%',transform=ax.transAxes,va='top',fontsize=15,bbox=dict(facecolor='white',edgecolor='0.35',boxstyle='round'))
+ fig.tight_layout();savefig(fig,'thermal_balance')
+def main():
+ OUT.mkdir(exist_ok=True);ts=list(np.arange(650.,851.,50.));ds=[.01,.05,.10,.15];tasks=[(t,d) for t in ts for d in ds];print(f'Режимов: {len(tasks)}')
+ with Pool(min(os.cpu_count()or 1,8),initializer=init) as p: rows=list(tqdm(p.imap_unordered(work,tasks),total=len(tasks),desc='Свип',unit='режим')) if tqdm else list(p.imap_unordered(work,tasks))
+ df=pd.DataFrame(rows);df.to_excel(OUT/'full_sweep.xlsx',index=False);ok=df[df.valid].copy();ok.to_csv(OUT/'valid_sweep.csv',index=False,encoding='utf-8-sig')
+ if ok.empty:raise RuntimeError('Нет допустимых режимов; см. full_sweep.xlsx')
+ figs(ok);print(f'Допустимо: {len(ok)}/{len(df)}; максимум КПД: {ok.eta_net_percent.max():.3f}%')
+if __name__=='__main__':main()

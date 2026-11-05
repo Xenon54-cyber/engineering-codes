@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+  <p:cSld>
+    <p:spTree>
+      <p:nvGrpSpPr>
+        <p:cNvPr id="1" name="" />
+        <p:cNvGrpSpPr />
+        <p:nvPr />
+      </p:nvGrpSpPr>
+      <p:grpSpPr>
+        <a:xfrm>
+          <a:off x="0" y="0" />
+          <a:ext cx="0" cy="0" />
+          <a:chOff x="0" y="0" />
+          <a:chExt cx="0" cy="0" />
+        </a:xfrm>
+      </p:grpSpPr>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="2" name="Вывод 2" />
+          <p:cNvSpPr txBox="1" />
+          <p:nvPr />
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="371475" y="120000" />
+            <a:ext cx="10732705" cy="500000" />
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst />
+          </a:prstGeom>
+          <a:noFill />
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="0" rIns="0" />
+          <a:lstStyle />
+          <a:p>
+            <a:pPr algn="l" spcBef="0" />
+            <a:r>
+              <a:rPr lang="ru-RU" sz="2400" dirty="0">
+                <a:latin typeface="Calibri" />
+                <a:cs typeface="Calibri" />
+              </a:rPr>
+              <a:t>Ключевые выводы оптимизации</a:t>
+            </a:r>
+            <a:endParaRPr lang="ru-RU" sz="2400">
+              <a:latin typeface="Calibri" />
+              <a:cs typeface="Calibri" />
+            </a:endParaRPr>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="3" name="Вывод 3" />
+          <p:cNvSpPr txBox="1" />
+          <p:nvPr />
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="650000" y="1050000" />
+            <a:ext cx="10100000" cy="3300000" />
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst />
+          </a:prstGeom>
+          <a:noFill />
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr wrap="square" lIns="0" rIns="0" />
+          <a:lstStyle />
+          <a:p>
+            <a:pPr algn="l" spcBef="0" />
+            <a:r>
+              <a:rPr lang="ru-RU" sz="1850" dirty="0">
+                <a:latin typeface="Calibri" />
+                <a:cs typeface="Calibri" />
+              </a:rPr>
+              <a:t>1. Рабочий режим He–Xe цикла: P₁ = 5,20 МПа, P₂ = 2,75 МПа, T₆ = 750 °C; КПД нетто 45,871 %.</a:t>
+            </a:r>
+            <a:endParaRPr lang="ru-RU" sz="1850">
+              <a:latin typeface="Calibri" />
+              <a:cs typeface="Calibri" />
+            </a:endParaRPr>
+          </a:p>
+          <a:p>
+            <a:pPr algn="l" spcBef="0" />
+            <a:r>
+              <a:rPr lang="ru-RU" sz="1850" dirty="0">
+                <a:latin typeface="Calibri" />
+                <a:cs typeface="Calibri" />
+              </a:rPr>
+              <a:t>2. Минимальный температурный напор рекуператора 1,21 K дает максимум КПД 46,606 % и требует проверки технической реализуемости.</a:t>
+            </a:r>
+            <a:endParaRPr lang="ru-RU" sz="1850">
+              <a:latin typeface="Calibri" />
+              <a:cs typeface="Calibri" />
+            </a:endParaRPr>
+          </a:p>
+          <a:p>
+            <a:pPr algn="l" spcBef="0" />
+            <a:r>
+              <a:rPr lang="ru-RU" sz="1850" dirty="0">
+                <a:latin typeface="Calibri" />
+                <a:cs typeface="Calibri" />
+              </a:rPr>
+              <a:t>3. КПД наиболее чувствителен к КПД турбины и компрессора. При ηТ = 0,927 и ηК = 0,930 расчетный максимум составляет 48,297 %.</a:t>
+            </a:r>
+            <a:endParaRPr lang="ru-RU" sz="1850">
+              <a:latin typeface="Calibri" />
+              <a:cs typeface="Calibri" />
+            </a:endParaRPr>
+          </a:p>
+          <a:p>
+            <a:pPr algn="l" spcBef="0" />
+            <a:r>
+              <a:rPr lang="ru-RU" sz="1850" dirty="0">
+                <a:latin typeface="Calibri" />
+                <a:cs typeface="Calibri" />
+              </a:rPr>
+              <a:t>4. Основное снижение полезной мощности связано с отводом теплоты в охладителе: 1,095 МВт при мощности нетто 1,261 МВт.</a:t>
+            </a:r>
+            <a:endParaRPr lang="ru-RU" sz="1850">
+              <a:latin typeface="Calibri" />
+              <a:cs typeface="Calibri" />
+            </a:endParaRPr>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+    </p:spTree>
+    <p:extLst>
+      <p:ext uri="{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}">
+        <p14:creationId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="2197059101" />
+      </p:ext>
+    </p:extLst>
+  </p:cSld>
+  <p:clrMapOvr>
+    <a:masterClrMapping />
+  </p:clrMapOvr>
+</p:sld>
