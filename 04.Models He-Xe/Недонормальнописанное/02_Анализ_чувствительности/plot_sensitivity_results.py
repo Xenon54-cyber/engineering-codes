@@ -7,6 +7,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.ticker import AutoMinorLocator
 
 
 HERE = Path(__file__).resolve().parent
@@ -19,24 +20,25 @@ OUT_DIR = DATA_DIR / "figures"
 
 # Все параметры оформления графиков находятся здесь.
 FONT = {
-    "family": "DejaVu Sans",
-    "title": 16.0,
-    "label": 14.0,
-    "tick": 14.0,
-    "legend": 14.0,
-    "annotation": 14.0,
+    "family": "Times New Roman",
+    "title": 11.0,
+    "label": 10.0,
+    "tick": 8.0,
+    "legend": 7.5,
+    "annotation": 8.0,
     "weight": "normal",
 }
 
 FIGURE = {
-    "single_column": (3.54, 2.75),
-    "double_column": (7.48, 4.60),
-    "dpi": 600,
-    "formats": ("pdf", "svg"),
+    # Единый горизонтальный кадр для слайдов: ширина 5, высота 3 дюйма.
+    "single_column": (5.0, 3.0),
+    "double_column": (5.0, 3.0),
+    "dpi": 300,
+    "formats": ("png", "pdf", "svg"),
     "cmap": "viridis",
 }
 
-LINE = {"width": 1.25, "marker_size": 4.5, "base_color": "#C00000"}
+LINE = {"width": 1.45, "marker_size": 4.8, "base_color": "#C00000"}
 
 METRICS = [
     ("eta_asmm_net_initial_heat", 100.0, "КПД нетто АСММ, %"),
@@ -59,12 +61,13 @@ def configure() -> None:
         "font.size": FONT["tick"], "axes.titlesize": FONT["title"],
         "axes.labelsize": FONT["label"], "xtick.labelsize": FONT["tick"],
         "ytick.labelsize": FONT["tick"], "legend.fontsize": FONT["legend"],
+        "mathtext.fontset": "stix", "axes.unicode_minus": False,
         "axes.linewidth": 0.8, "lines.linewidth": LINE["width"],
         "lines.markersize": LINE["marker_size"], "xtick.direction": "in",
         "ytick.direction": "in", "xtick.top": True, "ytick.right": True,
         "legend.frameon": True, "legend.framealpha": 0.96,
         "legend.facecolor": "white", "legend.edgecolor": "0.65",
-        "savefig.bbox": "tight", "pdf.fonttype": 42,
+        "legend.fancybox": False, "savefig.bbox": "standard", "pdf.fonttype": 42,
         "ps.fonttype": 42, "svg.fonttype": "none",
     })
 
@@ -72,8 +75,24 @@ def configure() -> None:
 def save(fig: plt.Figure, name: str, formats: Iterable[str] | None = None) -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for ext in formats or FIGURE["formats"]:
-        fig.savefig(OUT_DIR / f"{name}.{ext}", dpi=FIGURE["dpi"], facecolor="white")
+        fig.savefig(OUT_DIR / f"{name}.{ext}", dpi=FIGURE["dpi"],
+                    facecolor="white", bbox_inches=None)
     plt.close(fig)
+
+
+def style_axes(ax, *, grid: bool = True) -> None:
+    """Единый стиль осей: как на основных графиках проекта."""
+    ax.tick_params(which="major", length=3.5, width=0.75, pad=2.5)
+    ax.tick_params(which="minor", length=1.8, width=0.6)
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    if grid:
+        ax.grid(alpha=0.18, lw=0.5)
+
+
+def styled_legend(ax, *, loc: str = "best", ncol: int = 1) -> None:
+    ax.legend(loc=loc, ncol=ncol, frameon=True, framealpha=0.96,
+              facecolor="white", edgecolor="0.65", fancybox=False)
 
 
 def load() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.DataFrame]:
@@ -102,8 +121,8 @@ def group_response_plots(data: pd.DataFrame, base: pd.Series) -> None:
         ax.axhline(scale * base[column], color=LINE["base_color"], ls="--", lw=1.0,
                    label="Базовый режим")
         ax.set(xlabel=x_label, ylabel=label, title=label)
-        ax.grid(alpha=0.18, lw=0.5)
-        ax.legend(loc="best")
+        style_axes(ax)
+        styled_legend(ax)
         save(fig, f"{number}_{label.replace(', ', '_').replace(' ', '_')}")
 
 
@@ -118,8 +137,8 @@ def auxiliary_response_plots(data: pd.DataFrame, base: pd.Series) -> None:
             ax.axhline(scale * base[column], color=LINE["base_color"], ls="--", lw=1.0,
                        label="Базовый режим")
             ax.set(xlabel=x_label, ylabel=label, title=label)
-            ax.grid(alpha=0.18, lw=0.5)
-            ax.legend(loc="best")
+            style_axes(ax)
+            styled_legend(ax)
         fig.suptitle(f"Дополнительные показатели: {group}", fontsize=FONT["title"])
         save(fig, f"{index:02d}a_дополнительные_{group.replace(' ', '_')}")
 
@@ -134,24 +153,25 @@ def paired_efficiency_map(data: pd.DataFrame) -> None:
     z = np.ma.masked_invalid(100.0 * pivot.to_numpy(float))
     fig, ax = plt.subplots(figsize=FIGURE["double_column"], constrained_layout=True)
     filled = ax.contourf(x, y, z, levels=18, cmap=FIGURE["cmap"], extend="both")
-    lines = ax.contour(x, y, z, levels=9, colors="black", linewidths=0.35, alpha=0.6)
+    lines = ax.contour(x, y, z, levels=9, colors="black", linewidths=0.5, alpha=0.6)
     ax.clabel(lines, fmt="%.2f", fontsize=FONT["annotation"] - 1)
     best = frame.loc[frame["eta_asmm_net_initial_heat"].idxmax()]
-    ax.plot(best["eta_compressor"], best["eta_turbine"], "*", ms=11,
+    ax.plot(best["eta_compressor"], best["eta_turbine"], "*", ms=13,
             color=LINE["base_color"], markeredgecolor="white", label="Максимум КПД")
     ax.annotate(
         f"Максимум\n$\\eta_T$ = {best['eta_turbine']:.3f}\n"
         f"$\\eta_K$ = {best['eta_compressor']:.3f}\n"
         f"КПД = {100 * best['eta_asmm_net_initial_heat']:.3f}%",
-        (best["eta_compressor"], best["eta_turbine"]), xytext=(8, 8),
-        textcoords="offset points", fontsize=FONT["annotation"],
+        (best["eta_compressor"], best["eta_turbine"]), xytext=(0.57, 0.28),
+        textcoords="axes fraction", fontsize=FONT["annotation"], va="top",
         bbox={"boxstyle": "round,pad=0.28", "fc": "white", "ec": "0.45", "alpha": 0.96},
-        arrowprops={"arrowstyle": "->", "color": "0.3", "lw": 0.7},
     )
-    fig.colorbar(filled, ax=ax, label="КПД нетто АСММ, %")
+    colorbar = fig.colorbar(filled, ax=ax, pad=0.025, label="КПД нетто АСММ, %")
+    colorbar.ax.tick_params(labelsize=FONT["tick"], length=3)
     ax.set(xlabel="КПД компрессора, доля", ylabel="КПД турбины, доля",
            title="Контурная карта КПД нетто АСММ")
-    ax.legend(loc="lower right")
+    style_axes(ax)
+    styled_legend(ax, loc="lower right")
     save(fig, "04_контурная_карта_кпд_турбомашин")
 
 
@@ -170,10 +190,10 @@ def relative_change_plot(changes: pd.DataFrame) -> None:
         ax.set_title(group)
         ax.set_xlabel(GROUPS[group][1])
         ax.set_ylabel("Отклонение от базы, %")
-        ax.grid(alpha=0.18, lw=0.5)
+        style_axes(ax)
     handles, labels = axes[-1].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=2, frameon=True,
-               bbox_to_anchor=(0.5, -0.10), fontsize=FONT["legend"])
+               bbox_to_anchor=(0.5, 0.01), fontsize=FONT["legend"])
     save(fig, "05_относительные_изменения")
 
 
@@ -185,20 +205,20 @@ def actual_pinch_dependence(pinch: pd.DataFrame) -> None:
         ax.plot(group["T_pinch_C"], 100.0 * group["eta_asmm_net_initial_heat"],
                 "o-", label=f"$T_6$ = {t6:.0f} °C")
     best = pinch.loc[pinch["eta_asmm_net_initial_heat"].idxmax()]
-    ax.plot(best["T_pinch_C"], 100.0 * best["eta_asmm_net_initial_heat"], "*", ms=11,
+    ax.plot(best["T_pinch_C"], 100.0 * best["eta_asmm_net_initial_heat"], "*", ms=13,
             color=LINE["base_color"], markeredgecolor="white", label="Максимум КПД")
     ax.set(xlabel="Фактический минимальный температурный напор, К",
            ylabel="Максимальный КПД нетто АСММ, %",
            title="Влияние фактического температурного напора рекуператора")
     ax.set_xlim(1, 15)
-    ax.grid(alpha=0.18, lw=0.5)
-    ax.legend(loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.22))
+    style_axes(ax)
+    styled_legend(ax, loc="lower right", ncol=1)
     ax.text(
-        0.5, -0.38,
+        0.97, 0.96,
         f"Максимум: КПД = {100 * best['eta_asmm_net_initial_heat']:.3f}%; "
         f"$T_6$ = {best['T6_C']:.0f} °C; "
         f"$\\Delta T_{{pinch}}$ = {best['T_pinch_C']:.2f} К",
-        transform=ax.transAxes, ha="center", va="top", fontsize=FONT["annotation"],
+        transform=ax.transAxes, ha="right", va="top", fontsize=FONT["annotation"],
         bbox={"boxstyle": "round,pad=0.30", "fc": "white", "ec": "0.45", "alpha": 0.96},
     )
     save(fig, "06_кпд_от_фактического_pinch")
@@ -213,10 +233,18 @@ def base_energy_balance(base: pd.Series) -> None:
     fig, ax = plt.subplots(figsize=FIGURE["double_column"], constrained_layout=True)
     bars = ax.bar(range(len(values)), values, color=mpl.colormaps["Blues"](np.linspace(.35, .85, len(values))))
     bars[-1].set_color(LINE["base_color"])
-    ax.bar_label(bars, labels=[f"{value:.3f}" for value in values], padding=3, fontsize=FONT["annotation"])
+    for bar, value in zip(bars, values):
+        height = bar.get_height()
+        inside = height >= 0.35 * values.max()
+        ax.text(bar.get_x() + bar.get_width() / 2,
+                height * 0.53 if inside else height + 0.018 * values.max(),
+                f"{value:.3f}", ha="center", va="center" if inside else "bottom",
+                color="white" if inside else "black", fontweight="bold",
+                fontsize=FONT["annotation"])
     ax.set_xticks(range(len(labels)), labels)
     ax.set_ylabel("Мощность, МВт")
     ax.set_title("Энергетический баланс базового режима")
+    style_axes(ax, grid=False)
     ax.grid(axis="y", alpha=0.18, lw=0.5)
     save(fig, "07_энергетический_баланс_базы")
 

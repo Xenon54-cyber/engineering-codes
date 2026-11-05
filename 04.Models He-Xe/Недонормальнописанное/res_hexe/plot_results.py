@@ -20,18 +20,18 @@ FONT = {
     # Параметры соответствуют оформлению контурной карты-образца.
     # Times New Roman хорошо читается в отчёте и сохраняется как текст в PDF/SVG.
     "family": "Times New Roman",
-    "title": 18.0,
-    "label": 17.0,
-    "tick": 13.0,
-    "legend": 12.0,
-    "annotation": 12.0,
+    "title": 12.5,
+    "label": 12.5,
+    "tick": 9.5,
+    "legend": 8.5,
+    "annotation": 9.0,
     "weight": "normal",
 }
 FIGURE = {
-    # Ширина и пропорции близки к образцу: квадратная рабочая область
-    # плюс узкая вертикальная цветовая шкала.
-    "single_column": (6.8, 6.3),
-    "double_column": (8.3, 6.3),
+    # Единый портретный формат: ширина 3, высота 5 дюймов.
+    # Оси используют всю доступную высоту, без добавления пустого поля.
+    "single_column": (5.0, 3.0),
+    "double_column": (5.0, 3.0),
     "dpi": 300,
     "formats": ("png", "pdf", "svg"),
     "cmap": "viridis",}
@@ -91,7 +91,8 @@ def configure_matplotlib() -> None:
         "legend.facecolor": "white",
         "legend.edgecolor": "0.65",
         "legend.fancybox": True,
-        "savefig.bbox": "tight",
+        # Не обрезать поля: это сохраняет заданный формат кадра 4:3.
+        "savefig.bbox": "standard",
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
         "svg.fonttype": "none",
@@ -102,7 +103,7 @@ def save(fig: plt.Figure, name: str, formats: Iterable[str] | None = None) -> No
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for extension in formats or STYLE["formats"]:
         fig.savefig(OUT_DIR / f"{name}.{extension}", dpi=STYLE["dpi"],
-                    facecolor="white", bbox_inches="tight")
+                    facecolor="white", bbox_inches=None)
     plt.close(fig)
 
 
@@ -186,12 +187,12 @@ def pivot_grid(data: pd.DataFrame, column: str, scale: float = 1.0
 
 def mark_optimum(ax, row: pd.Series, value: float, unit: str) -> None:
     x, y = float(row["P2_MPa"]), float(row["P1_MPa"])
-    ax.plot(x, y, marker="*", ms=18, color=STYLE["optimum_color"],
+    ax.plot(x, y, marker="*", ms=14, color=STYLE["optimum_color"],
             markeredgecolor="white", markeredgewidth=0.9,
             label="Оптимум по КПД", zorder=10)
     ax.annotate(
         f"Оптимум\n$P_1$ = {y:.2f} МПа\n$P_2$ = {x:.2f} МПа\n{value:.3f} {unit}",
-        xy=(x, y), xytext=(0.60, 0.22), textcoords="axes fraction",
+        xy=(x, y), xytext=(0.60, 0.26), textcoords="axes fraction",
         fontsize=FONT["annotation"], ha="left", va="top",
         bbox={"boxstyle": "round,pad=0.28", "fc": "white",
               "ec": "0.45", "lw": 0.8, "alpha": 0.96},
@@ -210,13 +211,13 @@ def contour_plot(data: pd.DataFrame, optimum: pd.Series, *, column: str,
                        colors="black", linewidths=0.55, alpha=0.58)
     ax.clabel(lines, inline=True, fontsize=FONT["annotation"] - 2,
               fmt="%.2f", colors="black")
-    colorbar = fig.colorbar(filled, ax=ax, pad=0.02, shrink=0.96, aspect=22)
+    colorbar = fig.colorbar(filled, ax=ax, pad=0.035, shrink=0.96, aspect=22)
     colorbar.set_label(colorbar_label)
     colorbar.ax.tick_params(labelsize=FONT["tick"], length=3.5)
     ax.set_xlabel(TEXT["p2"])
     ax.set_ylabel(TEXT["p1"])
     ax.set_title(title)
-    style_axes(ax, square=True)
+    style_axes(ax)
     mark_optimum(ax, optimum, float(optimum[column]) * scale, optimum_unit)
     legend(ax, loc="lower right")
     save(fig, filename)
@@ -225,7 +226,7 @@ def contour_plot(data: pd.DataFrame, optimum: pd.Series, *, column: str,
 def efficiency_surface(data: pd.DataFrame, optimum: pd.Series, t6: float) -> None:
     x, y, z = pivot_grid(data, "eta_asmm_net_initial_heat", 100.0)
     xx, yy = np.meshgrid(x, y)
-    fig = plt.figure(figsize=STYLE["double_size"], layout="constrained")
+    fig = plt.figure(figsize=STYLE["single_size"], layout="constrained")
     ax = fig.add_subplot(111, projection="3d")
     surface = ax.plot_surface(xx, yy, z, cmap=STYLE["cmap"],
                               linewidth=0, antialiased=True, alpha=0.94)
@@ -287,8 +288,16 @@ def energy_balance(optimum: pd.Series) -> None:
     colors[-1] = mpl.colors.to_rgba("#C00000")
     bars = ax.bar(np.arange(len(values)), values, color=colors,
                   edgecolor="0.25", linewidth=0.45)
-    ax.bar_label(bars, labels=[f"{value:.3f}" for value in values],
-                 padding=3, fontsize=FONT["annotation"])
+    for bar, value in zip(bars, values):
+        height = bar.get_height()
+        inside = height >= 0.35 * values.max()
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            height * 0.53 if inside else height + 0.018 * values.max(),
+            f"{value:.3f}", ha="center", va="center" if inside else "bottom",
+            color="white" if inside else "black", fontsize=FONT["annotation"] + 1,
+            fontweight="bold",
+        )
     ax.set_xticks(np.arange(len(labels)), labels)
     ax.set_ylabel("Мощность, МВт")
     ax.set_title("Распределение начальной тепловой мощности в оптимальном режиме")
@@ -296,10 +305,10 @@ def energy_balance(optimum: pd.Series) -> None:
     ax.grid(axis="y", alpha=STYLE["grid_alpha"], lw=0.6)
     eta = 100.0 * optimum["eta_asmm_net_initial_heat"]
     ax.text(
-        0.99, 0.96,
+        0.03, 0.96,
         f"КПД нетто АСММ = {eta:.3f}%\n"
         f"$P_1$ = {optimum['P1_MPa']:.2f} МПа; $P_2$ = {optimum['P2_MPa']:.2f} МПа",
-        transform=ax.transAxes, ha="right", va="top",
+        transform=ax.transAxes, ha="left", va="top",
         fontsize=FONT["annotation"],
         bbox={"boxstyle": "round,pad=0.3", "fc": "white",
               "ec": "0.45", "alpha": 0.96},
@@ -331,7 +340,7 @@ def pressure_ratio_analysis(data: pd.DataFrame, optimum: pd.Series) -> None:
     ax1.set_ylabel("Удельная работа турбины, кДж/кг")
     ax1.set_title("Удельная работа турбины")
     style_axes(ax1, grid=True)
-    legend(ax1, loc="upper center", outside=True, ncol=STYLE["legend_columns"])
+    legend(ax1, loc="lower right", ncol=STYLE["legend_columns"])
     save(fig1, "07a_удельная_работа_турбины")
 
     # --- График 07b: Влияние степени расширения на КПД ---
@@ -348,13 +357,13 @@ def pressure_ratio_analysis(data: pd.DataFrame, optimum: pd.Series) -> None:
     ax2.set_ylabel("КПД нетто АСММ, %")
     ax2.set_title("Влияние степени расширения на КПД")
     style_axes(ax2, grid=True)
-    legend(ax2, loc="upper center", outside=True, ncol=STYLE["legend_columns"])
+    legend(ax2, loc="lower right", ncol=STYLE["legend_columns"])
     save(fig2, "07b_влияние_степени_расширения_на_кпд")
 
 
 def optimum_vs_t6(data: pd.DataFrame) -> None:
     best = data.loc[data.groupby("T6_C")["eta_asmm_net_initial_heat"].idxmax()].sort_values("T6_C")
-    fig, axes = plt.subplots(1, 2, figsize=STYLE["double_size"], constrained_layout=True)
+    fig, axes = plt.subplots(1, 2, figsize=STYLE["single_size"], constrained_layout=True)
     axes[0].plot(best["T6_C"], 100 * best["eta_asmm_net_initial_heat"],
                  "o-", color="#1F4E79", label="Максимальный КПД")
     axes[1].plot(best["T6_C"], best["N_el_net_W"] / 1e6,
@@ -434,7 +443,5 @@ def main() -> None:
     print(f"Графики сохранены: {OUT_DIR}")
     print(f"Использованный срез: T6 = {t6:.0f} °C")
     print(f"КПД глобального оптимума: {100 * optimum['eta_asmm_net_initial_heat']:.3f} %")
-
-
 if __name__ == "__main__":
     main()
