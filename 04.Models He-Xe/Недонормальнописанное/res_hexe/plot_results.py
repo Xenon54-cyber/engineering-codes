@@ -9,34 +9,31 @@ import numpy as np
 import pandas as pd
 from matplotlib.ticker import AutoMinorLocator
 
-# -----------------------------------------------------------------------------
-# НАСТРОЙКИ: весь внешний вид графиков редактируется в этом блоке
-# -----------------------------------------------------------------------------
-
 ROOT = Path(__file__).resolve().parent
 DATA_FILE = ROOT / "pressure_sweep_full.csv"
 PROFILE_FILE = ROOT / "recuperator_profile.csv"
 STATES_FILE = ROOT / "optimum_states.csv"
 OUT_DIR = ROOT / "figures"
-
 # None — автоматически выбрать T6 глобального оптимума; либо число, например 750.
 T6_SELECT: float | None = None
-
 FONT = {
-    "family": "DejaVu Sans",
-    "title": 10.0,
-    "label": 9.0,
-    "tick": 8.0,
-    "legend": 8.0,
-    "annotation": 8.0,
+    # Параметры соответствуют оформлению контурной карты-образца.
+    # Times New Roman хорошо читается в отчёте и сохраняется как текст в PDF/SVG.
+    "family": "Times New Roman",
+    "title": 18.0,
+    "label": 17.0,
+    "tick": 13.0,
+    "legend": 12.0,
+    "annotation": 12.0,
     "weight": "normal",
 }
-
 FIGURE = {
-    "single_column": (3.54, 2.75),
-    "double_column": (7.48, 4.60),
+    # Ширина и пропорции близки к образцу: квадратная рабочая область
+    # плюс узкая вертикальная цветовая шкала.
+    "single_column": (6.8, 6.3),
+    "double_column": (8.3, 6.3),
     "dpi": 300,
-    "formats": ("pdf", "svg"),
+    "formats": ("png", "pdf", "svg"),
     "cmap": "viridis",}
 
 STYLE = {
@@ -48,8 +45,8 @@ STYLE = {
     "cmap": FIGURE["cmap"],
     "contour_levels": 18,
     "contour_lines": 10,
-    "line_width": 1.4,
-    "marker_size": 6,
+    "line_width": 1.6,
+    "marker_size": 6.5,
     "optimum_color": "#C00000",
     "hot_color": "#B2182B",
     "cold_color": "#2166AC",
@@ -77,7 +74,9 @@ def configure_matplotlib() -> None:
         "xtick.labelsize": FONT["tick"],
         "ytick.labelsize": FONT["tick"],
         "legend.fontsize": FONT["legend"],
-        "axes.linewidth": 0.8,
+        "mathtext.fontset": "stix",
+        "axes.unicode_minus": False,
+        "axes.linewidth": 0.9,
         "lines.linewidth": STYLE["line_width"],
         "lines.markersize": STYLE["marker_size"],
         "xtick.direction": "in",
@@ -91,7 +90,7 @@ def configure_matplotlib() -> None:
         "legend.framealpha": 0.96,
         "legend.facecolor": "white",
         "legend.edgecolor": "0.65",
-        "legend.fancybox": False,
+        "legend.fancybox": True,
         "savefig.bbox": "tight",
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
@@ -115,6 +114,18 @@ def legend(ax, *, loc: str = "best", outside: bool = False,
     if outside:
         kwargs["bbox_to_anchor"] = (0.5, -0.18)
     ax.legend(**kwargs)
+
+
+def style_axes(ax, *, square: bool = False, grid: bool = False) -> None:
+    """Единое оформление осей для всех статичных рисунков."""
+    ax.tick_params(which="major", length=4.0, width=0.8, pad=3)
+    ax.tick_params(which="minor", length=2.1, width=0.65)
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    if square:
+        ax.set_box_aspect(1)
+    if grid:
+        ax.grid(alpha=STYLE["grid_alpha"], lw=0.6)
 
 
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -175,16 +186,15 @@ def pivot_grid(data: pd.DataFrame, column: str, scale: float = 1.0
 
 def mark_optimum(ax, row: pd.Series, value: float, unit: str) -> None:
     x, y = float(row["P2_MPa"]), float(row["P1_MPa"])
-    ax.plot(x, y, marker="*", ms=11, color=STYLE["optimum_color"],
-            markeredgecolor="white", markeredgewidth=0.6,
+    ax.plot(x, y, marker="*", ms=18, color=STYLE["optimum_color"],
+            markeredgecolor="white", markeredgewidth=0.9,
             label="Оптимум по КПД", zorder=10)
     ax.annotate(
         f"Оптимум\n$P_1$ = {y:.2f} МПа\n$P_2$ = {x:.2f} МПа\n{value:.3f} {unit}",
-        xy=(x, y), xytext=(9, 9), textcoords="offset points",
-        fontsize=FONT["annotation"], ha="left", va="bottom",
+        xy=(x, y), xytext=(0.60, 0.22), textcoords="axes fraction",
+        fontsize=FONT["annotation"], ha="left", va="top",
         bbox={"boxstyle": "round,pad=0.28", "fc": "white",
-              "ec": "0.45", "lw": 0.7, "alpha": 0.96},
-        arrowprops={"arrowstyle": "->", "color": "0.3", "lw": 0.7},
+              "ec": "0.45", "lw": 0.8, "alpha": 0.96},
     )
 
 
@@ -193,18 +203,20 @@ def contour_plot(data: pd.DataFrame, optimum: pd.Series, *, column: str,
                  filename: str, optimum_unit: str,
                  figsize: tuple[float, float] | None = None) -> None:
     x, y, z = pivot_grid(data, column, scale)
-    fig, ax = plt.subplots(figsize=figsize or STYLE["wide_size"], constrained_layout=True)
+    fig, ax = plt.subplots(figsize=figsize or STYLE["single_size"], layout="constrained")
     filled = ax.contourf(x, y, z, levels=STYLE["contour_levels"],
                          cmap=STYLE["cmap"], extend="both")
     lines = ax.contour(x, y, z, levels=STYLE["contour_lines"],
-                       colors="black", linewidths=0.35, alpha=0.60)
-    ax.clabel(lines, inline=True, fontsize=FONT["annotation"] - 1,
+                       colors="black", linewidths=0.55, alpha=0.58)
+    ax.clabel(lines, inline=True, fontsize=FONT["annotation"] - 2,
               fmt="%.2f", colors="black")
-    colorbar = fig.colorbar(filled, ax=ax, pad=0.02, shrink=0.96)
+    colorbar = fig.colorbar(filled, ax=ax, pad=0.02, shrink=0.96, aspect=22)
     colorbar.set_label(colorbar_label)
+    colorbar.ax.tick_params(labelsize=FONT["tick"], length=3.5)
     ax.set_xlabel(TEXT["p2"])
     ax.set_ylabel(TEXT["p1"])
     ax.set_title(title)
+    style_axes(ax, square=True)
     mark_optimum(ax, optimum, float(optimum[column]) * scale, optimum_unit)
     legend(ax, loc="lower right")
     save(fig, filename)
@@ -213,7 +225,7 @@ def contour_plot(data: pd.DataFrame, optimum: pd.Series, *, column: str,
 def efficiency_surface(data: pd.DataFrame, optimum: pd.Series, t6: float) -> None:
     x, y, z = pivot_grid(data, "eta_asmm_net_initial_heat", 100.0)
     xx, yy = np.meshgrid(x, y)
-    fig = plt.figure(figsize=STYLE["wide_size"], constrained_layout=True)
+    fig = plt.figure(figsize=STYLE["double_size"], layout="constrained")
     ax = fig.add_subplot(111, projection="3d")
     surface = ax.plot_surface(xx, yy, z, cmap=STYLE["cmap"],
                               linewidth=0, antialiased=True, alpha=0.94)
@@ -255,7 +267,7 @@ def recuperator_temperature(profile: pd.DataFrame) -> None:
     ax.set_xlabel("Относительная координата горячего потока, x/L")
     ax.set_ylabel("Температура, °C")
     ax.set_title("Температурный профиль рекуператора в оптимальном режиме")
-    ax.grid(alpha=STYLE["grid_alpha"], lw=0.5)
+    style_axes(ax, grid=True)
     legend(ax, loc="best")
     save(fig, "05_температурный_профиль_рекуператора")
 
@@ -280,7 +292,8 @@ def energy_balance(optimum: pd.Series) -> None:
     ax.set_xticks(np.arange(len(labels)), labels)
     ax.set_ylabel("Мощность, МВт")
     ax.set_title("Распределение начальной тепловой мощности в оптимальном режиме")
-    ax.grid(axis="y", alpha=STYLE["grid_alpha"], lw=0.5)
+    style_axes(ax)
+    ax.grid(axis="y", alpha=STYLE["grid_alpha"], lw=0.6)
     eta = 100.0 * optimum["eta_asmm_net_initial_heat"]
     ax.text(
         0.99, 0.96,
@@ -317,7 +330,7 @@ def pressure_ratio_analysis(data: pd.DataFrame, optimum: pd.Series) -> None:
     ax1.set_xlabel(r"Степень расширения, $P_1/P_2$")
     ax1.set_ylabel("Удельная работа турбины, кДж/кг")
     ax1.set_title("Удельная работа турбины")
-    ax1.grid(alpha=STYLE["grid_alpha"], lw=0.5)
+    style_axes(ax1, grid=True)
     legend(ax1, loc="upper center", outside=True, ncol=STYLE["legend_columns"])
     save(fig1, "07a_удельная_работа_турбины")
 
@@ -334,7 +347,7 @@ def pressure_ratio_analysis(data: pd.DataFrame, optimum: pd.Series) -> None:
     ax2.set_xlabel(r"Степень расширения, $P_1/P_2$")
     ax2.set_ylabel("КПД нетто АСММ, %")
     ax2.set_title("Влияние степени расширения на КПД")
-    ax2.grid(alpha=STYLE["grid_alpha"], lw=0.5)
+    style_axes(ax2, grid=True)
     legend(ax2, loc="upper center", outside=True, ncol=STYLE["legend_columns"])
     save(fig2, "07b_влияние_степени_расширения_на_кпд")
 
@@ -351,7 +364,7 @@ def optimum_vs_t6(data: pd.DataFrame) -> None:
     axes[1].set(xlabel=r"Температура $T_6$, °C", ylabel="Мощность нетто, МВт",
                 title="Мощность оптимального режима")
     for ax in axes:
-        ax.grid(alpha=STYLE["grid_alpha"], lw=0.5)
+        style_axes(ax, grid=True)
         legend(ax)
     save(fig, "08_оптимум_в_зависимости_от_T6")
 
@@ -370,7 +383,7 @@ def cycle_ts(states: pd.DataFrame) -> None:
     ax.set_xlabel("Энтропия, кДж/(кг·К)")
     ax.set_ylabel("Температура, °C")
     ax.set_title("T–s-диаграмма оптимального режима")
-    ax.grid(alpha=STYLE["grid_alpha"], lw=0.5)
+    style_axes(ax, grid=True)
     legend(ax)
     save(fig, "09_Ts_диаграмма")
 

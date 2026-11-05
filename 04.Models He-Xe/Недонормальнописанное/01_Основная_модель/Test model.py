@@ -23,28 +23,20 @@ from tqdm.auto import tqdm
 
 
 PROPERTY_NAMES = ("D", "H", "S", "Cp", "Vis", "Tcx")
-
-FONT = {
-    "family": "DejaVu Sans",
+FONT = {"family": "DejaVu Sans",
     "title": 10.0,
     "label": 9.0,
     "tick": 8.0,
     "legend": 8.0,
     "annotation": 8.0,
-    "weight": "normal",
-}
-
-FIGURE = {
-    "single_column": (3.54, 2.75),
+    "weight": "normal",}
+FIGURE = { "single_column": (3.54, 2.75),
     "double_column": (7.48, 4.60),
     "dpi": 300,
     "formats": ("pdf", "svg"),
-    "cmap": "viridis",
-}
-
+    "cmap": "viridis",}
 
 def apply_plot_style() -> None:
-    """Apply a restrained, publication-oriented Matplotlib style."""
     mpl.rcParams.update({
         "font.family": FONT["family"],
         "font.weight": FONT["weight"],
@@ -71,7 +63,6 @@ def apply_plot_style() -> None:
         "ps.fonttype": 42,
     "svg.fonttype": "none",
     })
-
 
 @dataclass(frozen=True)
 class CycleConfig:
@@ -117,8 +108,7 @@ class CycleConfig:
             "eta_generator": self.eta_generator,
             "eta_compressor_drive": self.eta_compressor_drive,
             "eta_water_pump": self.eta_water_pump,
-            "eta_water_motor": self.eta_water_motor,
-        }
+            "eta_water_motor": self.eta_water_motor,}
         bad = {k: v for k, v in etas.items() if not 0.0 < v <= 1.0}
         if bad:
             raise ValueError(f"Efficiencies must be in (0, 1]: {bad}")
@@ -129,10 +119,7 @@ class CycleConfig:
         if self.t0_c <= self.t1_c:
             raise ValueError("t0_c must be greater than the fixed turbine inlet temperature t1_c.")
 
-
 class PropertyModel:
-    """Safe adapter around the tabulated He-Xe interpolators."""
-
     def __init__(self, path: Path, x_xe: float):
         self.path = Path(path)
         raw = np.load(path, allow_pickle=True)
@@ -201,7 +188,6 @@ class PropertyModel:
         i = int(brackets[np.argmin(abs(grid[brackets] - guess))])
         return float(brentq(residual, float(grid[i]), float(grid[i + 1]), xtol=1e-8))
 
-
 @dataclass
 class State:
     node: int
@@ -219,11 +205,9 @@ class State:
     def t_c(self) -> float:
         return self.t_k - 273.15
 
-
 class CycleModel:
     def __init__(self, cfg: CycleConfig, props: PropertyModel):
         self.c, self.p = cfg, props
-
     def state_pt(self, node: int, p: float, t: float, g: float) -> State:
         return State(
             node, t, p, g,
@@ -232,9 +216,7 @@ class CycleModel:
             rho_kg_m3=self.p.value("D", p, t),
             cp_j_kgk=self.p.value("Cp", p, t),
             mu_pa_s=self.p.value("Vis", p, t),
-            k_w_mk=self.p.value("Tcx", p, t),
-        )
-
+            k_w_mk=self.p.value("Tcx", p, t),)
     def state_ph(self, node: int, p: float, h: float, g: float, guess: float) -> State:
         return self.state_pt(node, p, self.p.temperature("H", h, p, guess), g)
 
@@ -253,7 +235,6 @@ class CycleModel:
         return outlet, signed_power
 
     def recuperator_profile(self, states: dict[int, State], n: int | None = None) -> pd.DataFrame:
-        """Counter-current profile: hot 2->3, cold 5->6."""
         n = n or self.c.pinch_points
         fractions = np.linspace(0.0, 1.0, n)
         rows = []
@@ -272,7 +253,6 @@ class CycleModel:
             "x_L", "T_hot_C", "T_cold_C", "delta_T_K", "P_hot_Pa", "P_cold_Pa"))
 
     def fast_pinch(self, states: dict[int, State]) -> tuple[float, float]:
-        """Coarse but fast pinch estimate used during the full parameter sweep."""
         minimum = (np.inf, 0.0)
         for f in np.linspace(0.0, 1.0, self.c.pinch_points):
             h_h = states[2].h_j_kg + f * (states[3].h_j_kg - states[2].h_j_kg)
@@ -286,7 +266,6 @@ class CycleModel:
         return minimum
 
     def refined_pinch(self, states: dict[int, State]) -> tuple[float, float]:
-        """Refine the sampled minimum to reduce false acceptance near the pinch limit."""
         sampled = self.recuperator_profile(states)
         j = int(sampled["delta_T_K"].idxmin())
         x = sampled["x_L"].to_numpy()
@@ -444,11 +423,9 @@ class CycleModel:
 
 _WORKER_MODEL: CycleModel | None = None
 
-
 def _init_worker(props_path: str, cfg: CycleConfig) -> None:
     global _WORKER_MODEL
     _WORKER_MODEL = CycleModel(cfg, PropertyModel(Path(props_path), cfg.x_xe))
-
 
 def _solve_worker(task: tuple[float, float, float]) -> dict:
     t6, p1, p2 = task
@@ -459,7 +436,6 @@ def _solve_worker(task: tuple[float, float, float]) -> dict:
         return {"valid": False, "reason": f"{type(exc).__name__}: {exc}",
                 "T6_C": t6, "P1_MPa": p1, "P2_MPa": p2}
 
-
 def run_sweep(model: CycleModel, workers: int = 1) -> pd.DataFrame:
     c = model.c
     total = len(c.t6_grid_c) * len(c.p1_grid_mpa) * len(c.p2_grid_mpa)
@@ -467,7 +443,6 @@ def run_sweep(model: CycleModel, workers: int = 1) -> pd.DataFrame:
     rows: list[dict] = []
     bar_options = dict(total=total, desc="Расчёт режимов", unit="точка",
                        dynamic_ncols=True, smoothing=0.1)
-
     if workers <= 1:
         for task in tqdm(tasks, **bar_options):
             t6, p1, p2 = task
@@ -488,7 +463,6 @@ def run_sweep(model: CycleModel, workers: int = 1) -> pd.DataFrame:
                                row.get("P2_MPa", np.inf)))
     return pd.DataFrame(rows)
 
-
 def best_rows(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     valid = df.loc[df["valid"].eq(True)].copy()
     if valid.empty:
@@ -498,7 +472,6 @@ def best_rows(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         valid.groupby("T6_C")["eta_asmm_net_initial_heat"].idxmax()
     ].sort_values("T6_C")
     return best, by_t6
-
 
 def _format_worksheet(ws) -> None:
     ws.freeze_panes = "A2"
@@ -525,7 +498,6 @@ def _format_worksheet(ws) -> None:
             for cell in cells[1:]:
                 if isinstance(cell.value, (int, float)):
                     cell.number_format = fmt
-
 
 def export_excel(df: pd.DataFrame, profile: pd.DataFrame, states: pd.DataFrame,
                  cfg: CycleConfig, path: Path) -> None:
