@@ -56,8 +56,8 @@ Q_reactor = Q_HEAT * KPD_reactor
 Q_tr1 = Q_reactor * eta_tr1
 Q_CO2_RTO = Q_tr1 * KPD_RTO
 
-P1_range = np.arange(24.0, 35.0, 1.0) * 1e6
-P7_range = np.arange(8.0, 10.0, 0.50) * 1e6
+P1_range = np.arange(20.0, 35.5, 1) * 1e6
+P7_range = np.arange(8.0, 13.0, 0.5) * 1e6
 x_range = np.arange(0.6, 0.7, 0.1)
 
 # P1_range = np.array([25.0]) * 1e6

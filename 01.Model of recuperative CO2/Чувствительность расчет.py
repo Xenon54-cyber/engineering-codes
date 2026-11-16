@@ -35,8 +35,8 @@ eta_drive = 0.98
 eta_tr1 = 0.99
 eta_tr2 = 0.99
 
-P1_FIXED_MPa = 28.0
-P2_FIXED_MPa = 12.0
+P1_FIXED_MPa = 35.0
+P2_FIXED_MPa = 15
 P1_FIXED = P1_FIXED_MPa * 1e6
 P2_FIXED = P2_FIXED_MPa * 1e6
 N_REC_SECTIONS = 20

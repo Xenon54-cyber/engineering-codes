@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f22b5246-360b-4af8-88bd-8ea17d92d0fa" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/01.Model of recuperative CO2/Чувствительность расчет.py" beforeDir="false" afterPath="$PROJECT_DIR$/01.Model of recuperative CO2/Чувствительность расчет.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/02.Model of Recompression CO2/Recompression.py" beforeDir="false" afterPath="$PROJECT_DIR$/02.Model of Recompression CO2/Recompression.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/Old/Heat mode He-Xe.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/Old/Verification.py" beforeDir="false" afterPath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/Old/Verification.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/Properties H2O Interpolation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/Properties He-Xe Interpolation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/Test model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/all_props.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/props_x0.28_P1e+05.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/props_x0.28_P3e+06.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/props_x0.28_P5e+06.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/props_x0.29_P1e+05.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/props_x0.29_P3e+06.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/tables/props_x0.29_P5e+06.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/Cp_customer.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/D_customer.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/Vis_customer.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/density_comparison.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/density_comparison.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/density_comparison.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/density_comparison.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/heat_capacity_comparison.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/heat_capacity_comparison.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/heat_capacity_comparison.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/heat_capacity_comparison.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/verification_customer.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/verification_summary.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/verification_summary.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/viscosity_comparison.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/viscosity_comparison.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/viscosity_comparison.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res/verify/viscosity_comparison.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/cycle_results.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/01_контурная_карта_кпд.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/01_контурная_карта_кпд.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/02_контурная_карта_турбины.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/02_контурная_карта_турбины.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/03_контурная_карта_компрессора.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/03_контурная_карта_компрессора.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/03b_контурная_карта_мощности_нетто.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/03b_контурная_карта_мощности_нетто.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/04_3d_поверхность_кпд.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/04_3d_поверхность_кпд.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/05_температурный_профиль_рекуператора.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/05_температурный_профиль_рекуператора.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/06_тепловой_баланс.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/06_тепловой_баланс.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/07a_удельная_работа_турбины.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/07a_удельная_работа_турбины.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/07b_влияние_степени_расширения_на_кпд.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/07b_влияние_степени_расширения_на_кпд.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/08_оптимум_в_зависимости_от_T6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/08_оптимум_в_зависимости_от_T6.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/09_Ts_диаграмма.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/09_Ts_диаграмма.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/figures/Для презентации/Влияние Т6" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/interactive_cycle_map.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/interactive_cycle_table.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/optimum_states.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/plot_results.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/pressure_sweep_full.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/01_Основная_модель/res_hexe/recuperator_profile.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/plot_sensitivity_results.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/02_КПД_нетто_АСММ_%.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/02_КПД_нетто_АСММ_%.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/03_Потребление_компрессора_МВт.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/03_Потребление_компрессора_МВт.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/04 карта кпд турб комп.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/04_контурная_карта_кпд_турбомашин.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/04_контурная_карта_кпд_турбомашин.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/06_кпд_от_фактического_pinch.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/02_Анализ_чувствительности/Результаты_чувствительности_HeXe/figures/06_кпд_от_фактического_pinch.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Heat mode He-Xe.py" beforeDir="false" afterPath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Heat mode He-Xe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/aux_vs_dp.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/aux_vs_dp.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/comp_vs_tin.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/comp_vs_tin.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_map.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_map.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_T_out.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_T_out.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_hx.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_hx.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_pinch.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_pinch.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_tin.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/eta_vs_tin.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/full_sweep.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/heat_vs_tin.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/heat_vs_tin.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/thermal_balance.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/thermal_balance.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/valid_sweep.csv" beforeDir="false" afterPath="$PROJECT_DIR$/04.Models He-Xe/Все модели/03_Модель теплофикации/Результаты режима отпуск теплоты/valid_sweep.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/04.Models He-Xe/ОПИСАНИЕ_ПАПКИ.md" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="3Lgp0vIu0U9CleUfOzMqCxtZj2L" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.Heat mode He-Xe.executor": "Run",
+    "Python.Recompression.executor": "Run",
+    "Python.Чувствительность расчет.executor": "Run",
+    "Python.реком.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f22b5246-360b-4af8-88bd-8ea17d92d0fa" name="Changes" comment="" />
+      <created>1793885347530</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1793885347530</updated>
+    </task>
+    <servers />
+  </component>
+</project>

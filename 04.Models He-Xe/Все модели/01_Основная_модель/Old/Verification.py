@@ -23,9 +23,10 @@ OUT_DIR = ROOT.parent / "res" / "verify"
 X_XE = 0.283
 PRESSURES_MPA = (2.0, 4.0)
 
-FONT = {"family": "Times New Roman", "title": 14.0, "label": 12.0,
-        "tick": 10.0, "legend": 10.5, "annotation": 10.0}
-FIGURE = {"size": (5.0, 3.0), "dpi": 300, "formats": ("png", "pdf", "svg")}
+FONT = {"family": "Arial", "title": 14.0, "label": 11.0,
+        "tick": 9.0, "legend": 10.0, "annotation": 10.5}
+# Единый узкий и высокий формат, как у остальных рисунков проекта.
+FIGURE = {"size": (4.3, 4.0), "dpi": 300, "formats": ("png", "pdf", "svg")}
 COLORS, MARKERS = {2.0: "#1F77B4", 4.0: "#2CA02C"}, {2.0: "o", 4.0: "s"}
 
 REFERENCE_DATA = {
@@ -110,9 +111,8 @@ def plot_comparison(spec: dict, table: pd.DataFrame,
         ax.plot(t_line, y_line, color=color, label=f"Расчёт, {pressure:.0f} МПа")
         ax.scatter(reference["T_K"], reference["reference_value"], s=27,
                    marker=MARKERS[pressure], facecolors="white", edgecolors=color,
-                   linewidths=1.0, label=f"Справочные данные, {pressure:.0f} МПа", zorder=4)
-    ax.set(xlabel="Температура, К", ylabel=f"{spec['symbol']}, {spec['unit']}",
-           title=spec["title"])
+                   linewidths=1.0, label=f"Закрытые данные НИКИЭТ, {pressure:.0f} МПа", zorder=4)
+    ax.set(xlabel="Температура, К", ylabel=f"{spec['symbol']}, {spec['unit']}")
     style_axes(ax)
     ax.legend(loc="best")
     save_figure(fig, name)
@@ -143,9 +143,7 @@ def main() -> None:
     report.to_csv(OUT_DIR / "verification_summary.csv", index=False, encoding="utf-8-sig")
     report.to_excel(OUT_DIR / "verification_summary.xlsx", index=False)
     print("Сопоставление со справочными данными завершено:")
-    print(report.to_string(index=False, float_format=lambda value: f"{value:.3f}"))
+    print(report.to_string(index=False, float_format=lambda value: f"{value:.2f}"))
     print(f"Результаты сохранены: {OUT_DIR}")
-
-
 if __name__ == "__main__":
     main()
