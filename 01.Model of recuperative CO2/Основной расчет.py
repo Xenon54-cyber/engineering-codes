@@ -11,18 +11,12 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 import multiprocessing as mp
 
-# ============================================================
-# ИСХОДНЫЕ ДАННЫЕ
-# ============================================================
-
 FLUID = "CO2"
-
 TR1_C = 730.0
 TR2_C = 550.0
 T2_SET_C = 715.0
 T1_C = 712.0
 T4_C = 35.0
-
 TR1 = TR1_C + 273.15
 TR2 = TR2_C + 273.15
 T2_SET = T2_SET_C + 273.15
@@ -47,11 +41,9 @@ DT_REC = 5.0
 Q_reactor = Q_HEAT * KPD_reactor
 Q_tr1 = Q_reactor * eta_tr1
 Q_CO2_RTO = Q_tr1 * KPD_RTO
-
 Q_loss_reactor = Q_HEAT - Q_reactor
 Q_loss_tr1 = Q_reactor - Q_tr1
 Q_loss_RTO = Q_tr1 - Q_CO2_RTO
-
 P1_RANGE = np.arange(20.0, 36.1, 1.5) * 1e6
 P2_RANGE = np.arange(7.5, 16.1, 1.5) * 1e6
 DP_REC_HOT_FRAC = 0.03
@@ -65,11 +57,9 @@ P_NA = 1.0e6
 DP_NA_FRAC = 0.05
 P_WATER = 0.50e6
 DP_WATER_FRAC = 0.10
-
 ETA_PUMP = 0.80
 ETA_MOTOR = 0.95
 DT_WATER = 10.0
-
 
 def H_TP(T, P):
     return prop("H", "T", T, "P", P, FLUID)
